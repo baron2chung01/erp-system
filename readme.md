@@ -33,6 +33,16 @@ To set up and run the Laravel ERP system locally, follow these steps:
 5. Customize seed files based on your nedds and seed the database with initial data using `php artisan db:seed`.
 6. Start the development server with `php artisan serve`.
 
+To set up and run the Laravel ERP system using Docker, follow these steps:
+
+1. Clone this repository to your local machine.
+2. Install Docker on your machine if you haven't already.
+3. Build the Docker container using the provided yml file: `docker-compose -f docker-compose.dev.yml up -d --build`
+4. Run the command shell of docker container: `docker exec -it <container name> sh`
+5. Install required dependencies by running `composer install` && `npm install`
+
+Note: Make sure to configure the necessary environment variables in the `.env` file or using Docker environment variables for the database connection and other settings.
+
 ## Contributing
 
 Contributions are welcome! If you'd like to contribute to the Laravel ERP system, please follow these guidelines:

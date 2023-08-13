@@ -1,0 +1,106 @@
+version: "3"
+
+volumes:
+  dbdata:
+
+services:
+  database:
+    image: mariadb:10.7
+    ports:
+      - "3306"
+    environment:
+      - MYSQL_DATABASE=erp-system_data
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      net:
+    restart: always
+
+  # Web Server
+  webserver:
+    image: nginx:stable
+    volumes:
+      - ./docker/webserver/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/webserver/nginx/www.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./:/application
+      - ./docker/webserver/public/robots.disallow.txt:/application/public/robots.txt:ro
+    environment:
+      - VIRTUAL_HOST=erp-system.local.com,api-erp-system.local.com
+      - ENABLE_ACME=false
+    networks:
+      expose_network:
+      net:
+    depends_on:
+      - php_fpm
+    restart: always
+
+  # Web Application
+  php_fpm:
+    build:
+      context: ./docker/webapp
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/webapp/php-ini-overrides.ini:/usr/local/etc/php/conf.d/default.ini:ro
+      - ./docker/webapp/php-fpm-overrides.conf:/usr/local/etc/php-fpm.d/zz-pm.conf:ro
+      - ./:/application
+      - ./docker/webserver/public/robots.disallow.txt:/application/public/robots.txt:ro
+    networks:
+      net:
+    restart: always
+
+#  redis:
+#     image: redis:6.2.4-alpine
+#     expose:
+#       - "6379"
+#     restart: always
+#     networks:
+#       net:
+
+  # Queue worker
+#  worker:
+#    build:
+#      context: ./docker/worker
+#      dockerfile: Dockerfile
+#    command: php artisan horizon
+#    restart: always
+#    volumes:
+#      - ./:/application
+#    depends_on:
+#      - php_fpm
+#      - redis
+#    networks:
+#      net:
+
+  # Crontab
+#  cron:
+#    build:
+#      context: ./docker/crontab
+#      dockerfile: Dockerfile
+#    working_dir: /application
+#    restart: always
+#    volumes:
+#      - ./docker/webapp/php-ini-overrides.ini:/usr/local/etc/php/conf.d/default.ini:ro
+#      - ./:/application
+#    networks:
+#      net:
+
+#  laravel-echo-server:
+#    image: oanhnn/laravel-echo-server
+#    volumes:
+#      - ./laravel-echo-server.json:/app/laravel-echo-server.json:ro
+#    ports:
+#      - "6001"
+#    links:
+#      - redis
+#      - webserver
+#    networks:
+#      net:
+
+networks:
+  # Join proxy network for exposing http services
+  expose_network:
+    external:
+      name: web_proxy
+  # Internal network for this project
+  net:

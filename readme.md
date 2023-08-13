@@ -45,3 +45,7 @@ Contributions are welcome! If you'd like to contribute to the Laravel ERP system
 ## License
 
 This Laravel ERP system is open-source and distributed under the MIT License.
+
+## Contact
+
+If you have any questions or suggestions regarding this project, please feel free to post on this repository's issues.
